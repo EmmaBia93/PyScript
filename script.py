@@ -1,4 +1,5 @@
 from colorama import Fore, Style, init, Back
+from log_symbols import LogSymbols
 import subprocess
 import shutil
 import re
@@ -24,7 +25,7 @@ class Main:
             5: self.compliance
         }
         while self.running:
-            subprocess.call("cls", shell=True)
+            subprocess.call("clear", shell=True)
             
             txt_tecnicos = " TECNICOS "
             txt_menu = "( MENU PRINCIPAL )"
@@ -40,7 +41,7 @@ class Main:
             print(Style.RESET_ALL+"\n")
 
             try:
-                choice = input("INGRESE UNA OPCIÓN: ")
+                choice = input(Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
                 if choice.strip().isdigit():
                     choice = int(choice)
                     if choice in dic_functions:
@@ -48,10 +49,10 @@ class Main:
                     elif choice == 6:
                         self.running = False
                     else:
-                        print("POR FAVOR INGRESE UNA OPCIÓN CORRECTA") 
+                        print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
                         time.sleep(1)
                 else:
-                    print("POR FAVOR INGRESE UNA OPCIÓN CORRECTA") 
+                    print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
                     time.sleep(1)
                         
             except EOFError:
@@ -65,9 +66,9 @@ class Main:
     def ping(self):
 
         self.ping_running = True
-
+        
         while True:
-            subprocess.call("cls", shell=True)
+            subprocess.call("clear", shell=True)
             ips = {1:'192.168.1.20',2:'192.168.88.1',3:'192.168.1.100'}
             print('\r' +Fore.BLACK+Back.RED+f"{" PING ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
             print('\r'+Style.BRIGHT + Fore.BLUE)
@@ -80,30 +81,41 @@ class Main:
             print(Style.RESET_ALL+"\n")
             
             try:
-                choice = int(input("INGRESE UNA OPCIÓN: "))
+                choice = input(Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
 
                 if choice in ips:
                    proceso = subprocess.Popen(['ping', ips[choice], '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
-                        
-                elif choice == 4:
-                    subprocess.call("cls", shell=True)
-                    ip = input("INGRESE LA IP PARA REALIZAR EL PING: ")
-                    proceso = subprocess.Popen(['ping', ip, '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
-                elif choice == 5:
-                    return
-                
-                else:
-                    print("POR FAVOR INGRESE UNA OPCIÓN CORRECTA")
-            
-                if proceso:
+                   if proceso:
                     subprocess.call("cls", shell=True)
                     while self.ping_running:
                         output = proceso.stdout.readline()
                         if output:
                             print(output.strip())
+                        
+                elif choice == 4:
+                    subprocess.call("cls", shell=True)
+                    ip = input(LogSymbols.SUCCESS.value+" INGRESE LA IP PARA REALIZAR EL PING: ")
+                    proceso = subprocess.Popen(['ping', ip, '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
+                    if proceso:
+                        subprocess.call("cls", shell=True)
+                        while self.ping_running:
+                            output = proceso.stdout.readline()
+                            if output:
+                                print(output.strip())
+                    
+                elif choice == 5:
+                
+                    return
+                
+                else:
+                    print(choice)
+                    print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
+                    time.sleep(1) 
+            
+                
             
             except ValueError as e:
-                    print("POR FAVOR INGRESE UNA OPCIÓN CORRECTA") 
+                    print(LogSymbols.WARNING.value +Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
                     time.sleep(1)
             except KeyboardInterrupt:
                 self.ping_running = False
@@ -239,6 +251,26 @@ class Main:
         except subprocess.CalledProcessError as e:
             print(f"Error al configurar la IP estática: {e}")
             print(f"Salida de error: {e.stderr}")
+
+
+
+    def wait_for_device(ip, initial_wait=60, check_interval=10, timeout=300):
+    
+        print(f"Esperando {initial_wait} segundos para que el reinicio se complete...")
+        time.sleep(initial_wait)
+        
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                # Comprobar conectividad usando ping
+                if subprocess.call(['ping', '-c', '1', ip]) == 0:
+                    print("Dispositivo está en línea.")
+                    return True
+            except Exception as e:
+                print(f"Error al hacer ping: {e}")
+            time.sleep(check_interval)  # Esperar entre intentos de comprobación
+        print("Tiempo de espera agotado. El dispositivo no responde.")
+        return False
 
 
     def cargar_backup(self):
