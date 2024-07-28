@@ -14,7 +14,7 @@ import paramiko
 class Main:
     
     def __init__(self) -> None:
-        init()
+        init(autoreset=True)
 
         self.f_clock = [
                         '\U0001F550',  # 🕐 - Reloj a las 12:00
@@ -65,20 +65,29 @@ class Main:
         while self.running:
             subprocess.call('cls',shell=True)
             
-           
             txt_menu = "( MENU PRINCIPAL )"
-            print('\r' +Fore.BLACK+Back.RED+f"{txt_menu:-^{self.columnas}}"+Style.RESET_ALL+"\n")
-            print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - PING': ^{self.columnas}}\n")
-            print(f"{'2 - MARCAR O DESMARCAR LA TARJETA': ^{self.columnas}}\n")
-            print(f"{'3 - CARGAR BACKUP': ^{self.columnas}}\n")
-            print(f"{'4 - ESTABLECER HORA': ^{self.columnas}}\n")
-            print(f"{'5 - COMPLIANCE': ^{self.columnas}}\n")
-            print(f"{'6 - SALIR': ^{self.columnas}}\n")
-            print(Style.RESET_ALL+"\n")
+            print('\r' + Fore.BLACK + Back.RED + f"{txt_menu:-^{self.columnas}}" + Style.RESET_ALL + "\n")
 
+            options = [
+            "[1] PING",
+            "[2] MARCAR O DESMARCAR LA TARJETA",
+            "[3] CARGAR BACKUP",
+            "[4] ESTABLECER HORA",
+            "[5] COMPLIANCE",
+            "[6] SALIR"
+                        ]
+
+            # Encuentra el largo máximo de las opciones
+            max_length = max(len(option) for option in options)
+
+            # Calcula el espacio adicional necesario para centrar las opciones
+            padding = ((self.columnas+10) - max_length) // 2
+            color = Fore.BLUE
+            for option in options:
+                print(f"{color}{' ' * padding}{option}\n")
+           
             try:
-                choice = input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
+                choice = input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "+Fore.RED)
                 if choice.strip().isdigit():
                     choice = int(choice)
                     if choice in dic_functions:
@@ -108,18 +117,31 @@ class Main:
         while True:
             subprocess.call("cls", shell=True)
             ips = {1:'192.168.1.20',2:'192.168.88.1',3:'192.168.1.100'}
-            print('\r' +Fore.BLACK+Back.RED+f"{" PING ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
-            print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - ANTENA': ^{self.columnas}}\n")
-            print(f"{'2 - UBIQUITI': ^{self.columnas}}\n")
-            print(f"{'3 - FW': ^{self.columnas}}\n")
-            print(f"{'4 - CUSTOM': ^{self.columnas}}\n")
-            print(f"{'5 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}")
+            print('\r' +Fore.BLACK+Back.RED+f"{"( PING )":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
+            
+            options = [
+            "[1] ANTENA",
+            "[2] UBIQUITI",
+            "[3] FW",
+            "[4] OTRA IP",
+            "[5] VOLVER AL MENU PRINCIPAL"
+            
+                        ]
 
-            print(Style.RESET_ALL+"\n")
+
+            max_length = max(len(option) for option in options)
+
+            
+            padding = (self.columnas+10 - max_length) // 2
+
+            color = Fore.BLUE
+            for option in options:
+                print(f"{color}{' ' * padding}{option}\n")
+
+           
             
             try:
-                choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
+                choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "+Fore.RED))
 
                 if choice in ips:
                    proceso = subprocess.Popen(['ping', ips[choice], '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True,encoding='oem')
@@ -132,6 +154,7 @@ class Main:
                         
                 elif choice == 4:
                         subprocess.call("cls", shell=True)
+                        print('\r' +Fore.BLACK+Back.RED+f"{"( PING )":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
                         ip = input(" "+self.burbuja+" "+Fore.GREEN+" INGRESE LA IP PARA REALIZAR EL PING: " + Style.RESET_ALL)
                         proceso = subprocess.Popen(['ping', ip, '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True,encoding='oem')
                         if proceso:
@@ -181,15 +204,27 @@ class Main:
 
         while True:
             subprocess.call("cls", shell=True)
-            print('\r' +Fore.BLACK+Back.RED+f"{" TARJETA DE RED ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
-            print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - FIJAR/DESMARCAR': ^{self.columnas}}\n")
-            print(f"{'2 - IP PARA FIJAR': ^{self.columnas}}\n")
-            print(f"{'3 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}\n")
-            print(Style.RESET_ALL+"\n")
+            print('\r' +Fore.BLACK+Back.RED+f"{"( TARJETA DE RED )":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
+            
+            options = [
+                "[1] FIJAR/DESMARCAR",
+                "[2] IP PARA FIJAR",
+                "[3] VOLVER AL MENU PRINCIPAL"
+                
+                ]
+            
+            max_length = max(len(option) for option in options)
+
+            
+            padding = (self.columnas+10 - max_length) // 2
+
+            color = Fore.BLUE
+            for option in options:
+                print(f"{color}{' ' * padding}{option}\n")    
+        
             
             try:
-                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
+                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "+Fore.RED))
 
                     if choice == 1:
             
@@ -414,15 +449,24 @@ class Main:
     def cargar_backup(self):
         while True:
             subprocess.call("cls", shell=True)
-            print('\r' +Fore.BLACK+Back.RED+f"{" BACKUP ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
-            print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - ANTENA M5/M2': ^{self.columnas}}\n")
-            print(f"{'2 - ANTENA AC': ^{self.columnas}}\n")
-            print(f"{'3 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}\n")
-            print(Style.RESET_ALL+"\n")
+            print('\r' +Fore.BLACK+Back.RED+f"{"( BACKUP )":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
+            options = [
+                "[1] ANTENAS AIRMAX",
+                "[2] ANTENAS AC",
+                "[3] VOLVER AL MENU PRINCIPAL"
+                
+                ]
+            max_length = max(len(option) for option in options)
+
+            
+            padding = (self.columnas+10 - max_length) // 2
+
+            color = Fore.BLUE
+            for option in options:
+                print(f"{color}{' ' * padding}{option}\n")
             
             try:
-                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
+                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "+Fore.RED))
                     if choice in [1,2]:
                         print(Fore.BLUE +"PROBANDO LA CONEXIÓN CON EL DISPOSITIVO...")
                         if self.wait_for_device():
