@@ -1,20 +1,58 @@
 from colorama import Fore, Style, init, Back
-from log_symbols import LogSymbols
 import subprocess
 import shutil
 import re
 import time
-import paramiko
+from icmplib import ping
+from scp import SCPClient
 from halo import Halo
+import easygui
+from dotenv import load_dotenv
+import os
+import paramiko
 
 class Main:
     
     def __init__(self) -> None:
         init()
+
+        self.f_clock = [
+                        '\U0001F550',  # 🕐 - Reloj a las 12:00
+                        '\U0001F551',  # 🕑 - Reloj a la 1:00
+                        '\U0001F552',  # 🕒 - Reloj a las 2:00
+                        '\U0001F553',  # 🕓 - Reloj a las 3:00
+                        '\U0001F554',  # 🕔 - Reloj a las 4:00
+                        '\U0001F555',  # 🕕 - Reloj a las 5:00
+                        '\U0001F556',  # 🕖 - Reloj a las 6:00
+                        '\U0001F557',  # 🕗 - Reloj a las 7:00
+                        '\U0001F558',  # 🕘 - Reloj a las 8:00
+                        '\U0001F559',  # 🕙 - Reloj a las 9:00
+                        '\U0001F55A',  # 🕚 - Reloj a las 10:00
+                        '\U0001F55B',  # 🕛 - Reloj a las 11:00
+                    ]
+
+
+
+        self.f_moon = [
+                    '\U0001F311',
+                    '\U0001F312',
+                    '\U0001F313',
+                    '\U0001F314',
+                    '\U0001F315',
+                    '\U0001F316',
+                    '\U0001F317',
+                    '\U0001F318'
+                    ]
         self.running = True
         size = shutil.get_terminal_size()
         self.columnas = size.columns
-        
+        # Emojis en Unicode
+        self.advertencia = '\u26A0'  # ⚠️
+        self.error = '\u274C'        # ❌
+        self.exito = '\u2705'        # ✅
+        self.lapiz = '\U0001F4DD'    #  
+        self.burbuja = '\U0001F5E8'
+        self.reloj = '\U000023F3'
 
     def menu_principal(self):
         dic_functions = {
@@ -25,11 +63,10 @@ class Main:
             5: self.compliance
         }
         while self.running:
-            subprocess.call("clear", shell=True)
+            subprocess.call('cls',shell=True)
             
-            txt_tecnicos = " TECNICOS "
+           
             txt_menu = "( MENU PRINCIPAL )"
-            print('\r'+ Style.DIM + f"{txt_tecnicos:#^{self.columnas}}"+Style.RESET_ALL+"\n\n")
             print('\r' +Fore.BLACK+Back.RED+f"{txt_menu:-^{self.columnas}}"+Style.RESET_ALL+"\n")
             print('\r'+Style.BRIGHT + Fore.BLUE)
             print(f"{'1 - PING': ^{self.columnas}}\n")
@@ -41,7 +78,7 @@ class Main:
             print(Style.RESET_ALL+"\n")
 
             try:
-                choice = input(Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
+                choice = input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
                 if choice.strip().isdigit():
                     choice = int(choice)
                     if choice in dic_functions:
@@ -49,10 +86,11 @@ class Main:
                     elif choice == 6:
                         self.running = False
                     else:
-                        print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
+                        
+                        print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
                         time.sleep(1)
                 else:
-                    print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
+                    print('\n'+ self.advertencia+ Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
                     time.sleep(1)
                         
             except EOFError:
@@ -68,54 +106,54 @@ class Main:
         self.ping_running = True
         
         while True:
-            subprocess.call("clear", shell=True)
+            subprocess.call("cls", shell=True)
             ips = {1:'192.168.1.20',2:'192.168.88.1',3:'192.168.1.100'}
             print('\r' +Fore.BLACK+Back.RED+f"{" PING ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
             print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - ANTENA': ^{self.columnas}}")
-            print(f"{'2 - UBIQUITI': ^{self.columnas}}")
-            print(f"{'3 - FW': ^{self.columnas}}")
-            print(f"{'4 - CUSTOM': ^{self.columnas}}")
+            print(f"{'1 - ANTENA': ^{self.columnas}}\n")
+            print(f"{'2 - UBIQUITI': ^{self.columnas}}\n")
+            print(f"{'3 - FW': ^{self.columnas}}\n")
+            print(f"{'4 - CUSTOM': ^{self.columnas}}\n")
             print(f"{'5 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}")
 
             print(Style.RESET_ALL+"\n")
             
             try:
-                choice = input(Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " ")
+                choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
 
                 if choice in ips:
-                   proceso = subprocess.Popen(['ping', ips[choice], '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
+                   proceso = subprocess.Popen(['ping', ips[choice], '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True,encoding='oem')
                    if proceso:
                     subprocess.call("cls", shell=True)
                     while self.ping_running:
                         output = proceso.stdout.readline()
                         if output:
-                            print(output.strip())
+                            print(Fore.GREEN + output.strip()+Style.RESET_ALL)
                         
                 elif choice == 4:
-                    subprocess.call("cls", shell=True)
-                    ip = input(LogSymbols.SUCCESS.value+" INGRESE LA IP PARA REALIZAR EL PING: ")
-                    proceso = subprocess.Popen(['ping', ip, '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
-                    if proceso:
                         subprocess.call("cls", shell=True)
-                        while self.ping_running:
-                            output = proceso.stdout.readline()
-                            if output:
-                                print(output.strip())
+                        ip = input(" "+self.burbuja+" "+Fore.GREEN+" INGRESE LA IP PARA REALIZAR EL PING: " + Style.RESET_ALL)
+                        proceso = subprocess.Popen(['ping', ip, '-t'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True,encoding='oem')
+                        if proceso:
+                            subprocess.call("cls", shell=True)
+                            while self.ping_running:
+                                output = proceso.stdout.readline()
+                                if output:
+                                    print(Fore.GREEN + output.strip()+Style.RESET_ALL)
                     
                 elif choice == 5:
                 
-                    return
+                        return
                 
                 else:
-                    print(choice)
-                    print(LogSymbols.WARNING.value + Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
+                   
+                    print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
                     time.sleep(1) 
             
                 
             
             except ValueError as e:
-                    print(LogSymbols.WARNING.value +Fore.YELLOW+" POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
+                    print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL) 
                     time.sleep(1)
             except KeyboardInterrupt:
                 self.ping_running = False
@@ -123,8 +161,13 @@ class Main:
                 if not self.ping_running:
                     proceso.terminate()  # Asegurarse de terminar el proceso de ping
                     proceso.wait()       # Esperar a que el proceso termine completamente
-                    spinner = Halo(text="Saliendo...", spinner="dots",color="red")
-                    print("\n\nPresione ENTER para volver al menu principal")
+                    spinner = Halo(text=Fore.CYAN+"Esperando..."+Style.RESET_ALL,
+                                    spinner={
+                                        'interval':100,
+                                        'frames':self.f_clock
+                                    },
+                                    color="red")
+                    print("\n\n"+self.advertencia+" "+ Fore.YELLOW +" Presione ENTER para volver al menu principal"+Style.RESET_ALL)
                     spinner.start()
                    
                     input()
@@ -140,13 +183,13 @@ class Main:
             subprocess.call("cls", shell=True)
             print('\r' +Fore.BLACK+Back.RED+f"{" TARJETA DE RED ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
             print('\r'+Style.BRIGHT + Fore.BLUE)
-            print(f"{'1 - FIJAR/DESMARCAR': ^{self.columnas}}")
-            print(f"{'2 - IP PARA FIJAR': ^{self.columnas}}")
-            print(f"{'3 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}")
+            print(f"{'1 - FIJAR/DESMARCAR': ^{self.columnas}}\n")
+            print(f"{'2 - IP PARA FIJAR': ^{self.columnas}}\n")
+            print(f"{'3 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}\n")
             print(Style.RESET_ALL+"\n")
             
             try:
-                    choice = int(input("INGRESE UNA OPCIÓN: "))
+                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
 
                     if choice == 1:
             
@@ -169,33 +212,36 @@ class Main:
                         if result_text[-2:] == "no":
                             
                             self.enable_dhcp()
-                            print("SE HA DESMARCADO LA TARJETA EXITOSAMENTE!!!")
                             time.sleep(2)
                             return
                         else:
                             
-                            self.set_static_ip()
-                            print("SE HA FIJADO LA TARJETA EXITOSAMENTE!!!")
-                            time.sleep(2)
-                            return
+                            if self.set_static_ip():
+                                print("\n\n"+self.exito+" "+Fore.GREEN+" SE HA FIJADO LA TARJETA EXITOSAMENTE!!!"+Style.RESET_ALL)
+                                time.sleep(2)
+                                return
                     
                     elif choice == 2:
                         subprocess.call("cls", shell=True)
-                        ip = input("Ingrese la ip que desea fijar: ")
+                        ip=input(" "+self.burbuja+" "+Fore.GREEN+" INGRESE LA IP CON LA QUE DESEA FIJAR LA TARJETA DE RED: " + Style.RESET_ALL)
                         netmask = self.get_netmask(ip)
 
                         if netmask:
-                            self.set_static_ip(ip,netmask)
-                            print("SE HA FIJADO LA TARJETA EXITOSAMENTE!!!")
-                            time.sleep(2)
-                            return
+                            if self.set_static_ip(ip,netmask):
+                                print("\n\n"+self.exito+" "+Fore.GREEN+" SE HA FIJADO LA TARJETA EXITOSAMENTE!!!"+Style.RESET_ALL)
+                                time.sleep(2)
+                                return
+                            
 
                     elif choice == 3:
                         return
                     
-                        
+                    else:
+                        print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)  
+                        time.sleep(1)
+
             except Exception as e:
-                    print("POR FAVOR INGRESE UNA OPCIÓN CORRECTA") 
+                    print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
                     time.sleep(1)   
                         
 
@@ -206,10 +252,11 @@ class Main:
                 "Ethernet", "dhcp"
             ]
             subprocess.run(command, capture_output=True, text=True, check=True)
-            print("DHCP habilitado correctamente.")
+            print("\n"+self.exito+" "+Fore.GREEN+" EL DHCP FUE HABILITADO CORRECTAMENTE"+Style.RESET_ALL)
+            time.sleep(1)
         except subprocess.CalledProcessError as e:
-            print(f"Error al habilitar DHCP, EL PUERTO ESTA DESCONECTADO")
-
+            print("\n"+self.error+Fore.RED+" ERROR AL HABILITAR EL DHCP, VERIFIQUE LA CONEXION")
+            time.sleep(1)
 
     def get_netmask(self,ip):
         if not self.is_valid_ip(ip):
@@ -246,38 +293,226 @@ class Main:
                 "netsh", "interface", "ipv4", "set", "address",
                 f"name=Ethernet", "static", ip, mask
             ]
-            result = subprocess.run(command, capture_output=True, text=True, check=True)
-            
+            subprocess.run(command, capture_output=True, text=True, check=True)
+            return True
         except subprocess.CalledProcessError as e:
-            print(f"Error al configurar la IP estática: {e}")
-            print(f"Salida de error: {e.stderr}")
+            print("\n"+self.error+Fore.RED+" ERROR AL ESTABLECER LA IP ESTÁTICA")
+            time.sleep(1)
+            return False
 
 
 
-    def wait_for_device(ip, initial_wait=60, check_interval=10, timeout=300):
-    
-        print(f"Esperando {initial_wait} segundos para que el reinicio se complete...")
-        time.sleep(initial_wait)
+    def wait_for_device(self,ip='192.168.1.20', initial_wait=15, check_interval=10, timeout=30):
+        subprocess.call('cls', shell=True)
+        print("\n")
+        segundos  = initial_wait
+
+        spinner = Halo(text=Fore.YELLOW+f"Esperando {initial_wait} segundos para intentar conexión...",
+                       spinner={
+                           'interval':100,
+                           'frames':self.f_moon
+                       })
+        spinner.start()
+        while segundos >= 0:
+        # Actualizar el texto del spinner con el tiempo restante
+            spinner.text = Fore.YELLOW+f"Esperando {segundos} segundos para intentar conexión..."
+            time.sleep(1)  # Esperar 1 segundo
+            segundos -= 1  # Decrementar el tiempo
+        
         
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
                 # Comprobar conectividad usando ping
-                if subprocess.call(['ping', '-c', '1', ip]) == 0:
-                    print("Dispositivo está en línea.")
+                request = ping(ip,timeout=1,count=1)
+                
+                if request.is_alive:
+                    print("\n"+self.exito+" "+Fore.GREEN+"Dispositivo está en línea.")
+                    spinner.stop()
                     return True
             except Exception as e:
                 print(f"Error al hacer ping: {e}")
-            time.sleep(check_interval)  # Esperar entre intentos de comprobación
-        print("Tiempo de espera agotado. El dispositivo no responde.")
+            segundos=check_interval  
+            print("\n"+self.error+ " " +Fore.RED+ "NO HUBO RESPUESTA AL PING...")
+            while segundos >= 0:
+             # Actualizar el texto del spinner con el tiempo restante
+                spinner.text = Fore.YELLOW+f"Esperando {segundos} segundos"
+                time.sleep(1)  # Esperar 1 segundo
+                segundos -= 1 
+
+        spinner.stop()
+        print("\n"+self.error + " "+ Fore.RED +"Tiempo de espera agotado. El dispositivo no responde.")
+        input(Fore.RED +"Presione ENTER para continuar...")
         return False
 
+    def execute_commands(self,ip, port, username, password, commands:list):
+        
+        try:
+            
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Aceptar la clave del host automáticamente
+            ssh.connect(ip, port=port, username=username, password=password)
+
+            for command in commands:
+                stdin, stdout, stderr = ssh.exec_command(command)
+                
+            ssh.close()
+            return True
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+
+
+    def select_file(self):
+        archivo_path = easygui.fileopenbox(
+            title="Seleccionar archivo",
+            filetypes=["*.cfg"]
+        )
+        
+        return archivo_path
+
+
+    def transfer_file(self,ip, local_path,username="ubnt",password="ubnt"):
+        remote_path='/var/tmp/system.cfg'
+        load_dotenv()
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(ip, username=username, password=password)
+            
+            with SCPClient(ssh.get_transport()) as scp:
+                scp.put(local_path, remote_path)
+            
+            print("\n"+self.exito+Fore.GREEN+"ARCHIVO TRANSFERIDO CON EXITO!!!.")
+            ssh.close()
+            return True
+        except Exception as e:
+            print("\n"+self.error+Fore.GREEN+f"Error al transferir el archivo: {e}")
+            return False
+
+
+    def transfer_file_if_possible(self):
+        path = self.select_file()
+        if path:
+            print('\U00002709'+"  "+Fore.MAGENTA + "SE VA A TRANSFERIR EL ARCHIVO SELECCIONADO...")
+            if self.transfer_file():
+                print(self.exito+" "+Fore.GREEN, "SE HA TRANSFERIDO EL ARCHIVO CON EXITO!!!")
+                return True
+        return False
+
+    def restart_device(self,ip, port, username, password):
+        print(Fore.YELLOW, "SE VA A REINICIAR EL DISPOSITIVO PARA APLICAR LOS CAMBIOS")
+        request = self.execute_commands(
+            ip=ip,
+            port=port,
+            username=username,
+            password=password,
+            commands=['/tmp/system.cfg -w -p /etc/', '/usr/etc/rc.d/rc.softrestart save']
+        )
+        return request
 
     def cargar_backup(self):
-        pass
+        while True:
+            subprocess.call("cls", shell=True)
+            print('\r' +Fore.BLACK+Back.RED+f"{" BACKUP ":-^{self.columnas}}"+Style.RESET_ALL+"\n\n")
+            print('\r'+Style.BRIGHT + Fore.BLUE)
+            print(f"{'1 - ANTENA M5/M2': ^{self.columnas}}\n")
+            print(f"{'2 - ANTENA AC': ^{self.columnas}}\n")
+            print(f"{'3 - VOLVER AL MENU PRINCIPAL': ^{self.columnas}}\n")
+            print(Style.RESET_ALL+"\n")
+            
+            try:
+                    choice = int(input(" "+self.lapiz+" "+Back.BLUE+ Fore.BLACK +" INGRESE UNA OPCIÓN:"+ Style.RESET_ALL + " "))
+                    if choice in [1,2]:
+                        print(Fore.BLUE +"PROBANDO LA CONEXIÓN CON EL DISPOSITIVO...")
+                        if self.wait_for_device():
+                            if self.transfer_file_if_possible():
+                                password ='ubnt'
+                                ip = '192.168.1.20'
+                                port = 22
+                                username = 'ubnt'
+                                if self.restart_device(ip, port, username, password):
+                                    print('\U0001F513'+" "+Fore.CYAN+"SE PASARA HACER EL COMPLIANCE...")                   
+
+                            else:
+                                print("Se salio sin dar el path")
+                                time.sleep(2)
+
+                    elif choice==3:
+                        return
+                    else:
+                        print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)  
+                        time.sleep(1)
+
+            except Exception as e:
+                    print('\n'+self.advertencia + Fore.YELLOW+"  POR FAVOR INGRESE UNA OPCIÓN CORRECTA"+Style.RESET_ALL)
+                    time.sleep(1)  
+
+
+
+    
+
+
+    def sync_time(self):
+        try:
+            subprocess.run('w32tm /resync', check=True, stderr=subprocess.DEVNULL,stdout=subprocess.DEVNULL)
+            return True
+        except subprocess.CalledProcessError as e:
+            return False
+
+
+
+
+    def is_w32tm_service_running(self):
+        try:
+            result = subprocess.run(['sc', 'query', 'w32time'], capture_output=True, text=True, check=True)
+            output = result.stdout
+
+            if "RUNNING" in output:
+                return True
+            else:
+                return False
+        except:
+            return False
+
+
+    def start_w32tm_service(self):
+        try:
+            subprocess.run(['net', 'start', 'w32time'], check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            
+        except subprocess.CalledProcessError as e:
+            
+            pass
+
 
     def establecer_hora(self):
-        pass
+        subprocess.call("cls", shell=True)
+        print('\r' +Fore.BLACK+Back.RED+f"{" HORA ":-^{self.columnas}}"+Style.RESET_ALL+"\n")
+        spinner = Halo(text=Fore.CYAN+" SE ESTABLECERÁ LA HORA",
+                       spinner={
+                           'interval':100,
+                           'frames':self.f_clock
+                       })
+        spinner.start()
+        if self.is_w32tm_service_running():
+            if self.sync_time():
+                spinner.stop()
+                print(self.exito+" "+Fore.GREEN+"SE ESTABLECIÓ CORRECTAMENTE LA HORA, PRESIONE ENTER PARA CONTINUAR")
+            else:
+                spinner.stop()
+                print(self.error+ " " +Fore.RED+"NO SE PUDO ESTABLECER LA HORA, PRESIONE ENTER PARA CONTINUAR")
+        else:
+            self.start_w32tm_service()
+            if self.sync_time():
+                spinner.stop()
+                print(self.exito+" "+Fore.GREEN+"SE ESTABLECIÓ CORRECTAMENTE LA HORA, PRESIONE ENTER PARA CONTINUAR")
+            else:
+                spinner.stop()
+                print(self.error+ " " +Fore.RED+"NO SE PUDO ESTABLECER LA HORA, PRESIONE ENTER PARA CONTINUAR")
+        
+
+        input()
+
 
     def compliance(self):
         pass

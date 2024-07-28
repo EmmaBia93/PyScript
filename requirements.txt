@@ -2,3 +2,6 @@ paramiko==3.4.0
 scp==0.15.0
 colorama==0.4.6
 halo
+easygui==0.98.3
+python-dotenv==1.0.1
+icmplib==3.0.4
